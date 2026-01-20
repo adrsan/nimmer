@@ -1,0 +1,69 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/nimmer"]
+
+[project]
+name = "nimmer"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = []
+
+[dependency-groups]
+dev = [
+    "ruff>=0.14.13",
+    "mypy>=1.19.1",
+    "pytest>=9.0.2",
+    "tox>=4.34.1",
+    "tox-uv>=1.29.0",
+]
+
+
+[tool.mypy]
+python_version = "3.13"
+mypy_path = "src"
+explicit_package_bases = true
+
+[tool.ruff]
+line-length = 88
+target-version = "py313" # Updated to match your project setting
+
+[tool.ruff.lint]
+# E: pycodestyle, F: Pyflakes, I: isort, ANN: flake8-annotations
+select = ["E", "F", "I", "ANN"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**/*.py" = ["ANN"]
+"test_*.py" = ["ANN"]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+skip-magic-trailing-comma = false
+line-ending = "auto"
+
+[tool.tox]
+legacy_conf_yaml = """
+[tox]
+env_list = py313
+requires = tox-uv
+
+[testenv]
+dependency_groups = dev
+commands =
+    ruff format --check .
+    ruff check .
+    mypy .
+    pytest {posargs:tests}
+
+[testenv:fix]
+description = Automatically fix linting and formatting issues
+dependency_groups = dev
+commands =
+    ruff check . --fix
+    ruff format .
+"""
