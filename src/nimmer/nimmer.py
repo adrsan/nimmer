@@ -1,6 +1,6 @@
 import sys
 
-STOP_WORDS = {"of", "the", "and"}
+STOP_WORDS = {"of", "the", "and", "with", "a", "an", "in", "on", "for", "to", "at"}
 
 
 def nim(sentence: str) -> str:
