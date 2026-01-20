@@ -67,3 +67,8 @@ commands =
     ruff check . --fix
     ruff format .
 """
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+# --junitxml creates the file Azure DevOps needs
+addopts = "--junitxml=junit.xml"

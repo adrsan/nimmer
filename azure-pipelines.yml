@@ -1,0 +1,52 @@
+trigger:
+  - main
+  - master
+
+pr:
+  - main
+  - master
+
+jobs:
+- job: Test
+  displayName: 'Python 3.13 on'
+  strategy:
+    matrix:
+      linux:
+        imageName: 'ubuntu-latest'
+      windows:
+        imageName: 'windows-latest'
+  pool:
+    vmImage: $(imageName)
+
+  steps:
+  - checkout: self
+
+  # Install uv using the official standalone installer
+  - script: |
+      curl -LsSf https://astral.sh/uv/install.sh | sh
+      echo "##vso[task.prependpath]$HOME/.local/bin"
+    displayName: 'Install uv (Linux)'
+    condition: eq(variables['Agent.OS'], 'Linux')
+
+  - powershell: |
+      irm https://astral.sh/uv/install.ps1 | iex
+      echo "##vso[task.prependpath]$HOME\.local\bin"
+    displayName: 'Install uv (Windows)'
+    condition: eq(variables['Agent.OS'], 'Windows_NT')
+
+  - script: uv python install 3.13
+    displayName: 'Set up Python 3.13'
+
+  - script: uv run tox
+    displayName: 'Run Tox'
+
+    # Add this task right after Tox
+  - task: PublishTestResults@2
+    displayName: 'Publish Test Results'
+    inputs:
+      testResultsFiles: '**/junit.xml'
+      testRunTitle: 'Python $(Agent.OS) Tests'
+    condition: succeededOrFailed() # Run even if tests fail so you can see why
+
+  - script: uv build
+    displayName: 'Build package'
